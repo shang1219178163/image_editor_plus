@@ -1,6 +1,7 @@
 library image_editor_plus;
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:colorfilter_generator/colorfilter_generator.dart';
 import 'package:colorfilter_generator/presets.dart';
@@ -53,6 +54,9 @@ class ImageEditor extends StatelessWidget {
   final o.RotateOption? rotateOption;
   final o.TextOption? textOption;
 
+  /// 单图加工函数
+  final Future<File?> Function(Uint8List image)? onHandle;
+
   const ImageEditor({
     super.key,
     this.image,
@@ -68,6 +72,7 @@ class ImageEditor extends StatelessWidget {
     this.flipOption = const o.FlipOption(),
     this.rotateOption = const o.RotateOption(),
     this.textOption = const o.TextOption(),
+    this.onHandle,
   });
 
   @override
@@ -93,6 +98,7 @@ class ImageEditor extends StatelessWidget {
         flipOption: flipOption,
         rotateOption: rotateOption,
         textOption: textOption,
+        onHandle: onHandle,
       );
     } else {
       return MultiImageEditor(
@@ -375,6 +381,9 @@ class SingleImageEditor extends StatefulWidget {
   final o.RotateOption? rotateOption;
   final o.TextOption? textOption;
 
+  /// 加工函数
+  final Future<File?> Function(Uint8List image)? onHandle;
+
   const SingleImageEditor({
     super.key,
     this.image,
@@ -388,6 +397,7 @@ class SingleImageEditor extends StatefulWidget {
     this.flipOption = const o.FlipOption(),
     this.rotateOption = const o.RotateOption(),
     this.textOption = const o.TextOption(),
+    this.onHandle,
   });
 
   @override
@@ -414,6 +424,14 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
           reverse: true,
           scrollDirection: Axis.horizontal,
           child: Row(children: [
+            IconButton(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              icon: Icon(Icons.refresh, color: Colors.white),
+              onPressed: () {
+                resetTransformation();
+                setState(() {});
+              },
+            ),
             IconButton(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               icon: Icon(Icons.undo,
@@ -750,23 +768,35 @@ class _SingleImageEditorState extends State<SingleImageEditor> {
                         LoadingScreen(scaffoldGlobalKey).hide();
 
                         if (!mounted) return;
+                        if (mergedImage == null) {
+                          debugPrint("❌ 合并图片出错 mergedImage: $mergedImage");
+                          return;
+                        }
 
-                        Uint8List? croppedImage = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ImageCropper(
-                              image: mergedImage!,
-                              availableRatios: widget.cropOption!.ratios,
+                        dynamic croppedImage;
+                        if (widget.onHandle != null) {
+                          croppedImage =
+                              await widget.onHandle?.call(mergedImage);
+                        } else {
+                          croppedImage = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ImageCropper(
+                                image: mergedImage,
+                                availableRatios: widget.cropOption!.ratios,
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        }
 
-                        if (croppedImage == null) return;
+                        final fileNew = croppedImage ?? mergedImage;
 
                         flipValue = 0;
                         rotateValue = 0;
 
-                        await currentImage.load(croppedImage);
+                        // 裁剪后删掉文字图层
+                        layers.removeWhere((layer) => layer is TextLayerData);
+                        await currentImage.load(fileNew);
                         setState(() {});
                       },
                     ),
