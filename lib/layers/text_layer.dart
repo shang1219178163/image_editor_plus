@@ -7,13 +7,11 @@ import 'package:image_editor_plus/modules/text_layer_overlay.dart';
 class TextLayer extends StatefulWidget {
   final TextLayerData layerData;
   final VoidCallback? onUpdate;
-  final bool editable;
 
   const TextLayer({
     super.key,
     required this.layerData,
     this.onUpdate,
-    this.editable = false,
   });
   @override
   createState() => _TextViewState();
@@ -32,48 +30,44 @@ class _TextViewState extends State<TextLayer> {
       left: widget.layerData.offset.dx,
       top: widget.layerData.offset.dy,
       child: GestureDetector(
-        onTap: widget.editable
-            ? () {
-                showModalBottomSheet(
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(10),
-                      topLeft: Radius.circular(10),
-                    ),
-                  ),
-                  context: context,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) {
-                    return TextLayerOverlay(
-                      index: layers.indexOf(widget.layerData),
-                      layer: widget.layerData,
-                      onUpdate: () {
-                        if (widget.onUpdate != null) widget.onUpdate!();
-                        setState(() {});
-                      },
-                    );
-                  },
-                );
-              }
-            : null,
-        onScaleUpdate: widget.editable
-            ? (detail) {
-                if (detail.pointerCount == 1) {
-                  widget.layerData.offset = Offset(
-                    widget.layerData.offset.dx + detail.focalPointDelta.dx,
-                    widget.layerData.offset.dy + detail.focalPointDelta.dy,
-                  );
-                } else if (detail.pointerCount == 2) {
-                  widget.layerData.size =
-                      initialSize + detail.scale * (detail.scale > 1 ? 1 : -1);
+        onTap: () {
+          showModalBottomSheet(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(10),
+                topLeft: Radius.circular(10),
+              ),
+            ),
+            context: context,
+            backgroundColor: Colors.transparent,
+            builder: (context) {
+              return TextLayerOverlay(
+                index: layers.indexOf(widget.layerData),
+                layer: widget.layerData,
+                onUpdate: () {
+                  if (widget.onUpdate != null) widget.onUpdate!();
+                  setState(() {});
+                },
+              );
+            },
+          );
+        },
+        onScaleUpdate: (detail) {
+          if (detail.pointerCount == 1) {
+            widget.layerData.offset = Offset(
+              widget.layerData.offset.dx + detail.focalPointDelta.dx,
+              widget.layerData.offset.dy + detail.focalPointDelta.dy,
+            );
+          } else if (detail.pointerCount == 2) {
+            widget.layerData.size =
+                initialSize + detail.scale * (detail.scale > 1 ? 1 : -1);
 
-                  // print('angle');
-                  // print(detail.rotation);
-                  widget.layerData.rotation = detail.rotation;
-                }
-                setState(() {});
-              }
-            : null,
+            // print('angle');
+            // print(detail.rotation);
+            widget.layerData.rotation = detail.rotation;
+          }
+          setState(() {});
+        },
         child: Transform.rotate(
           angle: widget.layerData.rotation,
           child: Container(
@@ -82,7 +76,7 @@ class _TextViewState extends State<TextLayer> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: widget.layerData.background
-                    .withOpacity(widget.layerData.backgroundOpacity),
+                    .withAlpha(widget.layerData.backgroundOpacity.toInt()),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(

@@ -1,63 +1,49 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 class ImageItem {
-  int width = 1;
-  int height = 1;
-  Uint8List bytes = Uint8List.fromList([]);
-  Completer<bool> loader = Completer<bool>();
+  int width = 300;
+  int height = 300;
+  Uint8List image = Uint8List.fromList([]);
+  Completer loader = Completer();
 
-  ImageItem([dynamic image]) {
-    if (image != null) load(image);
+  ImageItem([dynamic img]) {
+    if (img != null) load(img);
   }
 
-  Future load(dynamic image) async {
-    loader = Completer<bool>();
+  Future get status => loader.future;
 
-    if (image is ImageItem) {
-      bytes = image.bytes;
+  Future load(dynamic imageFile) async {
+    loader = Completer();
 
-      height = image.height;
-      width = image.width;
+    dynamic decodedImage;
 
-      return loader.complete(true);
-    } else if (image is Uint8List) {
-      bytes = image;
-      var decodedImage = await decodeImageFromList(bytes);
+    if (imageFile is ImageItem) {
+      height = imageFile.height;
+      width = imageFile.width;
 
-      height = decodedImage.height;
-      width = decodedImage.width;
-
-      return loader.complete(true);
-    } else if (image is XFile) {
-      bytes = await image.readAsBytes();
-      var decodedImage = await decodeImageFromList(bytes);
-
-      height = decodedImage.height;
-      width = decodedImage.width;
-
-      return loader.complete(true);
+      image = imageFile.image;
+      loader.complete(true);
+    } else if (imageFile is Uint8List) {
+      image = imageFile;
+      decodedImage = await decodeImageFromList(imageFile);
     } else {
-      return loader.complete(false);
+      image = await imageFile.readAsBytes();
+      decodedImage = await decodeImageFromList(image);
     }
-  }
 
-  static ImageItem fromJson(Map json) {
-    var image = ImageItem(json['bytes']);
+    // image was decoded
+    if (decodedImage != null) {
+      // print(['height', viewportSize.height, decodedImage.height]);
+      // print(['width', viewportSize.width, decodedImage.width]);
 
-    image.width = json['width'];
-    image.height = json['height'];
+      height = decodedImage.height;
+      width = decodedImage.width;
 
-    return image;
-  }
+      loader.complete(decodedImage);
+    }
 
-  Map toJson() {
-    return {
-      'height': height,
-      'width': width,
-      'bytes': bytes,
-    };
+    return true;
   }
 }

@@ -7,13 +7,11 @@ import 'package:image_editor_plus/modules/image_layer_overlay.dart';
 class ImageLayer extends StatefulWidget {
   final ImageLayerData layerData;
   final VoidCallback? onUpdate;
-  final bool editable;
 
   const ImageLayer({
     super.key,
     required this.layerData,
     this.onUpdate,
-    this.editable = false,
   });
 
   @override
@@ -33,44 +31,40 @@ class _ImageLayerState extends State<ImageLayer> {
       left: widget.layerData.offset.dx,
       top: widget.layerData.offset.dy,
       child: GestureDetector(
-        onTap: widget.editable
-            ? () {
-                showModalBottomSheet(
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(10),
-                      topLeft: Radius.circular(10),
-                    ),
-                  ),
-                  context: context,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) {
-                    return ImageLayerOverlay(
-                      index: layers.indexOf(widget.layerData),
-                      layerData: widget.layerData,
-                      onUpdate: () {
-                        if (widget.onUpdate != null) widget.onUpdate!();
-                        setState(() {});
-                      },
-                    );
-                  },
-                );
-              }
-            : null,
-        onScaleUpdate: widget.editable
-            ? (detail) {
-                if (detail.pointerCount == 1) {
-                  widget.layerData.offset = Offset(
-                    widget.layerData.offset.dx + detail.focalPointDelta.dx,
-                    widget.layerData.offset.dy + detail.focalPointDelta.dy,
-                  );
-                } else if (detail.pointerCount == 2) {
-                  widget.layerData.scale = detail.scale;
-                }
+        onTap: () {
+          showModalBottomSheet(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(10),
+                topLeft: Radius.circular(10),
+              ),
+            ),
+            context: context,
+            backgroundColor: Colors.transparent,
+            builder: (context) {
+              return ImageLayerOverlay(
+                index: layers.indexOf(widget.layerData),
+                layerData: widget.layerData,
+                onUpdate: () {
+                  if (widget.onUpdate != null) widget.onUpdate!();
+                  setState(() {});
+                },
+              );
+            },
+          );
+        },
+        onScaleUpdate: (detail) {
+          if (detail.pointerCount == 1) {
+            widget.layerData.offset = Offset(
+              widget.layerData.offset.dx + detail.focalPointDelta.dx,
+              widget.layerData.offset.dy + detail.focalPointDelta.dy,
+            );
+          } else if (detail.pointerCount == 2) {
+            widget.layerData.scale = detail.scale;
+          }
 
-                setState(() {});
-              }
-            : null,
+          setState(() {});
+        },
         child: Transform(
           transform: Matrix4(
             1,
@@ -93,7 +87,7 @@ class _ImageLayerState extends State<ImageLayer> {
           child: SizedBox(
             width: widget.layerData.image.width.toDouble(),
             height: widget.layerData.image.height.toDouble(),
-            child: Image.memory(widget.layerData.image.bytes),
+            child: Image.memory(widget.layerData.image.image),
           ),
         ),
       ),

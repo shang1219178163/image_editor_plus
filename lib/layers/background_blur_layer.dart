@@ -7,13 +7,11 @@ import 'package:image_editor_plus/data/layer.dart';
 class BackgroundBlurLayer extends StatefulWidget {
   final BackgroundBlurLayerData layerData;
   final VoidCallback? onUpdate;
-  final bool editable;
 
   const BackgroundBlurLayer({
     super.key,
     required this.layerData,
     this.onUpdate,
-    this.editable = false,
   });
 
   @override

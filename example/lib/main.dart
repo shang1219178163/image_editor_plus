@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_editor_plus/image_editor_plus.dart';
-import 'package:image_editor_plus/options.dart';
 
 void main() {
   runApp(
@@ -54,9 +53,6 @@ class _ImageEditorExampleState extends State<ImageEditorExample> {
                 MaterialPageRoute(
                   builder: (context) => ImageEditor(
                     image: imageData,
-                    cropOption: const CropOption(
-                      reversible: false,
-                    ),
                   ),
                 ),
               );

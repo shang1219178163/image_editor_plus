@@ -43,6 +43,13 @@ class _TextLayerOverlayState extends State<TextLayerOverlay> {
       child: Column(
         children: [
           const SizedBox(height: 10),
+          Center(
+            child: Text(
+              i18n('Size Adjust').toUpperCase(),
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+          const SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
@@ -83,7 +90,7 @@ class _TextLayerOverlayState extends State<TextLayerOverlay> {
                 TextButton(
                   onPressed: () {
                     setState(() {
-                      widget.layer.backgroundOpacity = 0.5;
+                      widget.layer.backgroundOpacity = 0;
                       widget.onUpdate();
                     });
                   },
@@ -151,10 +158,6 @@ class _TextLayerOverlayState extends State<TextLayerOverlay> {
                     colorListener: (int value) {
                       setState(() {
                         widget.layer.background = Color(value);
-                        if (widget.layer.backgroundOpacity == 0) {
-                          widget.layer.backgroundOpacity = 0.5;
-                        }
-
                         widget.onUpdate();
                       });
                     },
@@ -164,7 +167,6 @@ class _TextLayerOverlayState extends State<TextLayerOverlay> {
                   onPressed: () {
                     setState(() {
                       widget.layer.background = Colors.transparent;
-                      widget.layer.backgroundOpacity = 0;
                       widget.onUpdate();
                     });
                   },
@@ -188,13 +190,13 @@ class _TextLayerOverlayState extends State<TextLayerOverlay> {
                 Expanded(
                   child: Slider(
                     min: 0,
-                    max: 1,
-                    divisions: 100,
-                    value: widget.layer.backgroundOpacity,
+                    max: 255,
+                    divisions: 255,
+                    value: widget.layer.backgroundOpacity.toDouble(),
                     thumbColor: Colors.white,
                     onChanged: (double value) {
                       setState(() {
-                        widget.layer.backgroundOpacity = value;
+                        widget.layer.backgroundOpacity = value.toInt();
                         widget.onUpdate();
                       });
                     },

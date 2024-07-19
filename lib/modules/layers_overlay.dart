@@ -81,7 +81,7 @@ class _ManageLayersOverlayState extends State<ManageLayersOverlay> {
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.memory(
-                                layer.image.bytes,
+                                layer.image.image,
                                 fit: BoxFit.cover,
                                 width: 40,
                                 height: 40,
@@ -90,7 +90,7 @@ class _ManageLayersOverlayState extends State<ManageLayersOverlay> {
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.memory(
-                                    layer.image.bytes,
+                                    layer.file.image,
                                     fit: BoxFit.cover,
                                     width: 40,
                                     height: 40,
@@ -207,45 +207,41 @@ class _ManageLayersOverlayState extends State<ManageLayersOverlay> {
                     width: 64,
                     height: 64,
                     child: Center(
-                      child: layer is LinkLayerData
-                          ? const Icon(Icons.link,
-                              size: 32, color: Colors.white)
-                          : (layer is TextLayerData || layer is EmojiLayerData
-                              ? Text(
-                                  layer is TextLayerData
-                                      ? 'T'
-                                      : (layer as EmojiLayerData).text,
-                                  style: const TextStyle(
-                                    fontSize: 32,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w100,
-                                  ),
-                                )
-                              : (layer is ImageLayerData
+                      child: layer is TextLayerData || layer is EmojiLayerData
+                          ? Text(
+                              layer is TextLayerData
+                                  ? 'T'
+                                  : (layer as EmojiLayerData).text,
+                              style: const TextStyle(
+                                fontSize: 32,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w100,
+                              ),
+                            )
+                          : (layer is ImageLayerData
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.memory(
+                                    layer.image.image,
+                                    fit: BoxFit.cover,
+                                    width: 40,
+                                    height: 40,
+                                  ))
+                              : (layer is BackgroundLayerData
                                   ? ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.memory(
-                                        layer.image.bytes,
+                                        layer.file.image,
                                         fit: BoxFit.cover,
                                         width: 40,
                                         height: 40,
                                       ))
-                                  : (layer is BackgroundLayerData
-                                      ? ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          child: Image.memory(
-                                            layer.image.bytes,
-                                            fit: BoxFit.cover,
-                                            width: 40,
-                                            height: 40,
-                                          ))
-                                      : const Text(
-                                          '',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                          ),
-                                        )))),
+                                  : const Text(
+                                      '',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ))),
                     ),
                   ),
                   SizedBox(
@@ -253,14 +249,7 @@ class _ManageLayersOverlayState extends State<ManageLayersOverlay> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (layer is LinkLayerData)
-                          Text(
-                            layer.text,
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
-                          )
-                        else if (layer is TextLayerData)
+                        if (layer is TextLayerData)
                           Text(
                             layer.text,
                             style: const TextStyle(
